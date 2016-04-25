@@ -116,7 +116,7 @@ class NodeProcessor:
       printOk = False
   
   
-  #Replaces the X chracter on the txt file to have the node count and difference
+  #Replaces the X character on the txt file to have the node count and difference
   def processOutputFile(self):
     #print("YY")
     fin  = open(self.oFileName, 'r')
