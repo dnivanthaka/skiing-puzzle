@@ -193,7 +193,7 @@ function traverseNodes($dimensions, &$data, $pivot, $temp_fp){
 
 $graphs = [];
 
-readCSVData("map.txt", $dimensions, $data);
+readCSVData("../Data/map.txt", $dimensions, $data);
 
 //print_r($data);
 print_r($dimensions);
