@@ -116,12 +116,11 @@ class NodeProcessor:
       printOk = False
   
   
-  #Replaces the X chracter on the txt file to have the node count and difference
+  #Replaces the X character on the txt file to have the node count and difference
   def processOutputFile(self):
     #print("YY")
     fin  = open(self.oFileName, 'r')
-    fout = open('temp.txt', 'w')
-    #fout = open('temp.txt', 'w')
+    fout = open('temp_python.txt', 'w')
     
     for line in fin:
       #line = line.replace('\n', '')
@@ -140,7 +139,7 @@ class NodeProcessor:
     lst = []
     maxlist = []
     
-    fin  = open('temp.txt', 'r')
+    fin  = open('temp_python.txt', 'r')
     
     for line in fin:
       arr = line.split(',')
