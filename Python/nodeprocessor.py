@@ -165,7 +165,7 @@ class NodeProcessor:
     print("======================================================")
     fin.close()
   
-nodes = NodeProcessor('map.txt', 'output2.txt')
+nodes = NodeProcessor('../Data/map.txt', 'output2.txt')
 nodes.readInputData()
 #nodes.printData()
 #print(nodes.getMaxDataValue())
