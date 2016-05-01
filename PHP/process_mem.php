@@ -4,6 +4,26 @@
 
 // Memory based version
 //TODO Merge these two files and make one script which accept commandline parameters to switch into temp file and memory modes.
+/*Results from running time ./process_mem.php (Typical)
+real    4m50.467s
+user    4m48.108s
+sys     0m2.052s
+*/
+
+/* Define filter class to compute node count and difference calculation */
+class nodediff_filter extends php_user_filter {
+  function filter($in, $out, &$consumed, $closing)
+  {
+    while ($bucket = stream_bucket_make_writeable($in)) {
+      $data_arr = explode(' ', $bucket->data);
+      $bucket->data = strtoupper($bucket->data.' '.count($data_arr).' '.(int)((int)$data_arr[0] - (int)$data_arr[count($data_arr) - 1])."\n");
+      $consumed += $bucket->datalen;
+      stream_bucket_append($out, $bucket);
+    }
+    return PSFS_PASS_ON;
+  }
+}
+
 
 $data = [];
 $dimensions = 0;
@@ -181,7 +201,8 @@ function traverseNodes($dimensions, &$data, $pivot, $temp_fp){
 	$node_diff = ((int)$arr[0] - (int)$arr[count($arr) - 1]);
 	//$graphs .= $val."\n";
 	
-	fwrite($temp_fp, $graphs.' '.$node_count.' '.$node_diff."\n");
+	//fwrite($temp_fp, $graphs.' '.$node_count.' '.$node_diff."\n");
+	fwrite($temp_fp, $graphs);
 	$graphs = "";
 	
 	//fwrite($temp_fp, $val."\n");
@@ -194,6 +215,10 @@ function traverseNodes($dimensions, &$data, $pivot, $temp_fp){
    return $graphs;
 }
 
+/* Register filter with PHP */
+stream_filter_register("nodediff", "nodediff_filter")
+    or die("Failed to register filter");
+
 $graphs = [];
 
 readCSVData("../Data/map.txt", $dimensions, $data);
@@ -201,8 +226,10 @@ readCSVData("../Data/map.txt", $dimensions, $data);
 //print_r($data);
 print_r($dimensions);
 //print_r(traverseNodes($dimensions, $data, array(8, 1, 2)));
-//$fp = fopen('temp_php.txt', 'w');
+//$fp = fopen('temp_php.txt', 'w+');
 $fp = fopen('php://memory', 'w+');
+/* Attach the registered filter */
+stream_filter_append($fp, "nodediff", STREAM_FILTER_WRITE);
 //echo 'XXX'.$fp;
 parseData($dimensions, $data, $graphs, 1500, -1, $fp);
 rewind($fp);
@@ -214,6 +241,6 @@ readCSVData($fp, $dimensions, $data, false, true);
 
 
 fclose($fp);
-
+//print_r($data);
 print_r(findMatching($data));
 
