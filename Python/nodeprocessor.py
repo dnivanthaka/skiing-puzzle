@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+'''
+Results from running time ./nodeprocessor.py (Typical)
+real    1m40.874s
+user    1m40.320s
+sys     0m0.448s
+'''
 import csv
 #from os import remove, close
 
@@ -12,7 +18,6 @@ class NodeProcessor:
     self.oFileName = ofile
     self.oFile = open(ofile, 'w')
     self.templines = ''
-    self.currentVal = -1
     
 
   #Reads the input data file  
@@ -62,7 +67,9 @@ class NodeProcessor:
     
   #Used for writing lines into the temporary .txt file    
   def writeToFile(self):
-    self.oFile.write(self.templines + '\n')
+    res = self.templines.split(' ');
+    
+    self.oFile.write(self.templines + ' ' + str(len(res)) + ' ' + str(int(res[0]) - int(res[-1])) +'\n')
     self.templines = ''
   
   #This is the Big method which processes the data and saves the resulting paths into a temporary file
@@ -78,7 +85,7 @@ class NodeProcessor:
     #Looking at top node
     if (y - 1) >= 0 and int(self.data[y - 1][x]) < int(val):
       #print('top')
-      self.setPrintLine(str(val) + ", ")
+      self.setPrintLine(str(val) + " ")
       self.traverseNodes([self.data[y - 1][x], (y - 1), x], nodeVal)
       #print('Y', end="\n")
       printOk = False
@@ -86,7 +93,7 @@ class NodeProcessor:
     #Looking at bottom node
     if (y + 1) < self.dimensions[0] and int(self.data[y + 1][x]) < int(val):
       #print('bottom')
-      self.setPrintLine(str(val) + ", ")
+      self.setPrintLine(str(val) + " ")
       self.traverseNodes([self.data[y + 1][x], (y + 1), x], nodeVal)
       #print('Z', end="\n")
       printOk = False
@@ -94,7 +101,7 @@ class NodeProcessor:
     #Looking at right node
     if (x + 1) < self.dimensions[1] and int(self.data[y][x + 1]) < int(val):
       #print('right')
-      self.setPrintLine(str(val) + ", ")
+      self.setPrintLine(str(val) + " ")
       self.traverseNodes([self.data[y][x + 1], y, (x + 1)], nodeVal)
       #print('I', end="\n")
       printOk = False
@@ -102,53 +109,39 @@ class NodeProcessor:
     #Looking at left node
     if (x - 1) >= 0 and int(self.data[y][x - 1]) < int(val):
       #print('left')
-      self.setPrintLine(str(val) + ", ")
+      self.setPrintLine(str(val) + " ")
       self.traverseNodes([self.data[y][x - 1], y, (x - 1)], nodeVal)
       #print('J', end="\n")
       printOk = False
       #print(val, file = ofile, end=" ")
     #if(int(val) > 0):
     if printOk:
-      self.setPrintLine(str(val) + ', X')
+      self.setPrintLine(str(val))
       #print('X', file = self.oFile, end="\n")
       self.writeToFile()
       #print(nodeVal, file = self.oFile, end=", ")
       printOk = False
   
-  
-  #Replaces the X character on the txt file to have the node count and difference
-  def processOutputFile(self):
-    #print("YY")
-    fin  = open(self.oFileName, 'r')
-    fout = open('temp_python.txt', 'w')
-    
-    for line in fin:
-      #line = line.replace('\n', '')
-      arr = line.split(',')
-      #fout.write(line.replace('X', str(len(arr) - 1)) + "#" + str(int(arr[0]) - int(arr[-2])))
-      count_str = str(len(arr) - 1) + "#" + str(int(arr[0]) - int(arr[-2]))
-      fout.write(line.replace('X', count_str))
-    fout.close()
-    fin.close()
-  
   #Processes the txt file to find the best possible path
   def findBiggestDiff(self):
     max_nodes = 0
     diff  = 0
+    nodes = 0
  
     lst = []
     maxlist = []
     
-    fin  = open('temp_python.txt', 'r')
+    fin  = open(self.oFileName, 'r')
     
     for line in fin:
-      arr = line.split(',')
-      diffs = arr[-1].replace('\n', '').replace(' ', '').split('#')
+      arr = line.split(' ')
+      diffs = arr[-1].replace('\n', '')
+      nodes = arr[-2]
       
       #print(diffs)
-      if int(diffs[0]) >= max_nodes:
-        max_nodes = int(diffs[0])
-        diff  = int(diffs[1])
+      if int(nodes) >= max_nodes:
+        max_nodes = int(nodes)
+        diff  = int(diffs)
         lst.append([diff, max_nodes, line.replace('\n', '')])
         
     diff = 0
@@ -159,13 +152,15 @@ class NodeProcessor:
         max_nodes = val[1]
         maxlist = val
           
-    print("======================================================")
-    print(maxlist)
-    print("Best path = ", maxlist[2])
-    print("======================================================")
+    print("\033[1;31m======================================================================")
+    print(maxlist[0:2])
+    bpath = maxlist[2].split(' ')
+    del(bpath[-1], bpath[-1])
+    print("Best path = ", bpath)
+    print("======================================================================\033[0m")
     fin.close()
   
-nodes = NodeProcessor('../Data/map.txt', 'output2.txt')
+nodes = NodeProcessor('../Data/map.txt', 'temp_python.txt')
 nodes.readInputData()
 #nodes.printData()
 #print(nodes.getMaxDataValue())
@@ -176,7 +171,7 @@ nodes.readInputData()
 ranges = range(1500, -1, -1)
 for val in ranges:
   #val = 9
-  print(val)
+  #print(val)
   pivots = nodes.findValues(val)
 
   for p in pivots:
@@ -185,5 +180,4 @@ for val in ranges:
     nodes.traverseNodes([val, p[0], p[1]], val)
 #nodes.traverseNodes(pivot, pivot[0])
 nodes.closeOutputFile()
-nodes.processOutputFile()
 nodes.findBiggestDiff()

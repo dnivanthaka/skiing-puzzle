@@ -2,6 +2,9 @@
 <?php
 //set_time_limit(0);
 
+// Memory based version
+//TODO Merge these two files and make one script which accept commandline parameters to switch into temp file and memory modes.
+
 $data = [];
 $dimensions = 0;
 
