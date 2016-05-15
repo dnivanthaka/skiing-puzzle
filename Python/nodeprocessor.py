@@ -147,6 +147,7 @@ class NodeProcessor:
     diff = 0
     max_nodes = 0
     for val in lst:
+      print(val)
       if val[0] > diff and val[1] > max_nodes:
         diff = val[0]
         max_nodes = val[1]
